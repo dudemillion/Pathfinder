@@ -1,0 +1,46 @@
+* {
+    font-family: monospace;
+    background-color: #d9d2e9;
+    text-align: center;
+}
+
+#grid {
+  display: grid;
+  grid-template-columns: repeat(10, 40px);
+  gap: 0px;
+}
+
+.cell {
+  width: 40px;
+  height: 40px;
+  background-color: white;
+  border: 1px solid #000000;
+}
+
+.wall {
+  width: 40px;
+  height: 40px;
+  background-color: black;
+  border: 1px solid #000000;
+}
+
+.start {
+  width: 40px;
+  height: 40px;
+  background-color: rgb(248, 248, 99);
+  border: 1px solid #000000;
+}
+
+.end {
+  width: 40px;
+  height: 40px;
+  background-color: rgb(247, 124, 124);
+  border: 1px solid #000000;
+}
+
+.path {
+  width: 40px;
+  height: 40px;
+  background-color: lightgreen;
+  border: 1px solid #000000;
+}
