@@ -11,6 +11,16 @@
     <h1>Pathfind!</h1>
     <p>A pathfinding algorithm program that will pathfind from the defined start to end while avoiding your defined walls.</p>
     <div id="grid"></div>
-    
+    <p>Press on any tile to make it a wall.</p>
+    <label for="start">Start X,Y: </label>
+    <input type="text" id="start" name="start">
+    <label for="end">End X,Y: </label>
+    <input type="text" id="end" name="end">
+    <label for="algo">Pathfinding Algorithm: </label>
+    <select name="algo" id="algo">
+        <option value="BFS">BFS</option>
+        <option value="A*">A* (NON-FUNCTIONAL)</option>
+    </select>
+    <button id="pathfind">Pathfind!</button>
 </body>
 </html>

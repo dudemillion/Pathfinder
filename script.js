@@ -1,3 +1,6 @@
+const pathfindButton = document.getElementById("pathfind");
+const startxy = document.getElementById("start");
+const endxy = document.getElementById("end");
 class Cell {
   constructor(x, y) {
     this.x = x;
@@ -113,31 +116,36 @@ class Grid {
 }
 
 class UIControl {
-    updateCellVisual(div) {
-        if (div.classList.contains("cell")) {
-            if (!div.isWall) {
-                div.isWall = true;
-                div.classList.remove("cell");
-                div.classList.add("wall");
-            } else if (div.isWall) {
-                div.isWall = false;
-                div.classList.remove("wall");
-                div.classList.add("cell");
-            }
+    updateCellVisual(div, cell) {
+        div.classList.remove("wall");
+        div.classList.remove("start");
+        div.classList.remove("end");
+        div.classList.remove("path")
+        if (cell.isWall) {
+          div.classList.add("wall");
+        } else if (cell.isStart) {
+          div.classList.add("start");
+        } else if (cell.isEnd) {
+          div.classList.add("end");
+        } else if (cell.isPath) {
+          div.classList.add("path");
         }
-    }
+        }
     renderGrid(grid) {
         const gridElement = document.getElementById("grid");
-        for (let y = 0; y < grid.cells.length; y++) {
-            for (let x = 0; x < grid.cells[y].length; x++) {
+        gridElement.innerHTML = "";
+        for (let y = 0; y < grid.rows; y++) {
+            for (let x = 0; x < grid.cols; x++) {
             const cell = grid.getCell(x, y);
             const cellDiv = document.createElement("div");
             cellDiv.classList.add("cell");
-            cellDiv.dataset.x = x;
-            cellDiv.dataset.y = y;
             cellDiv.addEventListener("click", () => {
+              if (cell.isEnd || cell.isStart) {
+                alert("This cannot be a wall. Change this start/end cell first.")
+              } else {
                 cell.toggleWall();
-                this.updateCellVisual(cellDiv);
+                this.updateCellVisual(cellDiv, cell);
+              }
             });
             gridElement.appendChild(cellDiv);
             }
@@ -145,6 +153,102 @@ class UIControl {
     }
 
 }
+class Pathfinder {
+  findPath(grid) {
+    if (!grid.startCell || !grid.endCell) {
+      return null;
+    }
+    grid.resetPath();
+    let queue = [];
+    let start = grid.startCell;
+    let end = grid.endCell;
+    start.visited = true;
+    queue.push(start);
+    while (queue.length > 0) {
+      let currentcell = queue.shift();
+      if (currentcell === end) {
+        return this.buildPath(end);
+      }
+      let currentcellneighbors = this.getNeighbors(grid, currentcell);
+      for (let neighbor of currentcellneighbors) {
+        if (!neighbor.visted && !neighbor.isWall) {
+          neighbor.visited = true;
+          neighbor.parent = currentcell;
+          queue.push(neighbor);
+        }
+      }
+    }
+    return null;
+  } 
+  getNeighbors(grid, cell) {
+    let cellneighbors = [];
+    let posdirections = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+    for (let [x, y] of posdirections) {
+      let newposx = cell.x + x;
+      let newposy = cell.y + y;
+      if (grid.isValidCoordinate(newposx, newposy)) {
+        cellneighbors.push(grid.getCell(newposx, newposy));
+      }
+    }
+    return cellneighbors;
+  }
+  buildPath(endCell) {
+    let path = [];
+    let currentcell = endCell;
+    while (currentcell !== null) {
+      path.push(currentcell);
+      currentcell = currentcell.parent;
+    }
+    path.reverse();
+    return path;
+  }
+}
 let thegrid = new Grid();
 let UI = new UIControl();
 UI.renderGrid(thegrid);
+startxy.addEventListener("input", function() {
+  let input = startxy.value;
+  let test = input.match(/\d,\d/i);
+  if (test) {
+    const x = test[0][0];
+    const y = test[0][2];
+    const startcoord = thegrid.setStart(x, y);
+    if (!startcoord) {
+      alert("This coordinate cannot be the start.");
+      return;
+    }
+    UI.renderGrid(thegrid);
+  } else {
+    console.log("input does not match regex." + input);
+  }
+})
+endxy.addEventListener("input", function() {
+  let input = endxy.value;
+  let test = input.match(/\d,\d/i);
+  if (test) {
+    const x = test[0][0];
+    const y = test[0][2];
+    const endcoord = thegrid.setEnd(x, y);
+    if (!endcoord) {
+      alert("This coordinate cannot be the end.");
+      return;
+    }
+    UI.renderGrid(thegrid);
+  } else {
+    console.log("input does not match regex.")
+  }
+})
+pathfindButton.addEventListener("click", function() {
+  let pathfinder = new Pathfinder();
+  let path = pathfinder.findPath(thegrid);
+  if (path) {
+    for (let cell of path) {
+      if (!cell.isStart && !cell.isEnd) {
+        cell.isPath = true;
+      }
+    }
+    UI.renderGrid(thegrid);
+  } else {
+    alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.")
+  }
+})

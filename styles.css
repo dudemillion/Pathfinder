@@ -17,6 +17,10 @@
   border: 1px solid #000000;
 }
 
+.cell:hover {
+  background-color: rgb(194, 194, 194);
+}
+
 .wall {
   width: 40px;
   height: 40px;
@@ -43,4 +47,13 @@
   height: 40px;
   background-color: lightgreen;
   border: 1px solid #000000;
+}
+input {
+  background-color: whitesmoke;
+}
+select {
+  background-color: whitesmoke;
+}
+button {
+  background-color: #b4a7d6;
 }
