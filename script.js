@@ -1,6 +1,7 @@
 const pathfindButton = document.getElementById("pathfind");
 const startxy = document.getElementById("start");
 const endxy = document.getElementById("end");
+const reset = document.getElementById("reset");
 class Cell {
   constructor(x, y) {
     this.x = x;
@@ -45,9 +46,9 @@ class Grid {
     this.createGrid();
   }
   createGrid() {
-    for (let y = 0; y < this.rows; y++) {
+    for (let y = 0; y < this.cols; y++) {
       let row = [];
-      for (let x = 0; x < this.cols; x++) {
+      for (let x = 0; x < this.rows; x++) {
         row.push(new Cell(x, y));
       }
       this.cells.push(row);
@@ -97,13 +98,6 @@ class Grid {
       }
     }
   }
-  clearWalls() {
-    for (let row of this.cells) {
-      for (let cell of row) {
-        cell.isWall = false;
-      }
-    }
-  }
   resetAll() {
     for (let row of this.cells) {
       for (let cell of row) {
@@ -139,6 +133,7 @@ class UIControl {
             const cell = grid.getCell(x, y);
             const cellDiv = document.createElement("div");
             cellDiv.classList.add("cell");
+            this.updateCellVisual(cellDiv, cell);              
             cellDiv.addEventListener("click", () => {
               if (cell.isEnd || cell.isStart) {
                 alert("This cannot be a wall. Change this start/end cell first.")
@@ -171,7 +166,7 @@ class Pathfinder {
       }
       let currentcellneighbors = this.getNeighbors(grid, currentcell);
       for (let neighbor of currentcellneighbors) {
-        if (!neighbor.visted && !neighbor.isWall) {
+        if (!neighbor.visited && !neighbor.isWall) {
           neighbor.visited = true;
           neighbor.parent = currentcell;
           queue.push(neighbor);
@@ -179,10 +174,13 @@ class Pathfinder {
       }
     }
     return null;
-  } 
+  }
+  findPathAStar(grid) {
+    // Not Implemented
+  }
   getNeighbors(grid, cell) {
     let cellneighbors = [];
-    let posdirections = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+    let posdirections = [[0, 1], [0, -1], [1, 0], [-1, 0]];
     for (let [x, y] of posdirections) {
       let newposx = cell.x + x;
       let newposy = cell.y + y;
@@ -244,6 +242,8 @@ pathfindButton.addEventListener("click", function() {
   if (path) {
     for (let cell of path) {
       if (!cell.isStart && !cell.isEnd) {
+        console.log("Added path cell!");
+        console.log(thegrid.getCell(cell.x, cell.y));
         cell.isPath = true;
       }
     }
@@ -251,4 +251,10 @@ pathfindButton.addEventListener("click", function() {
   } else {
     alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.")
   }
+})
+reset.addEventListener("click", function() {
+  thegrid.resetAll();
+  startxy.value = "";
+  endxy.value = "";
+  UI.renderGrid(thegrid);
 })

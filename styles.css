@@ -7,9 +7,15 @@
 #grid {
   display: grid;
   grid-template-columns: repeat(10, 40px);
+  place-content: center;
   gap: 0px;
 }
 
+#pathfind {
+  min-height: 50px;
+  min-width: 200px;
+  font-size: 30px;
+}
 .cell {
   width: 40px;
   height: 40px;
