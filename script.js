@@ -2,6 +2,14 @@ const pathfindButton = document.getElementById("pathfind");
 const startxy = document.getElementById("start");
 const endxy = document.getElementById("end");
 const reset = document.getElementById("reset");
+const animate = document.getElementById("anim");
+const forward = document.getElementById("forward");
+const backward = document.getElementById("backward");
+const auto = document.getElementById("auto");
+const advancetext = document.getElementById("advancetext");
+const advance = document.getElementById("advance");
+const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+let isRunning = false;
 class Cell {
   constructor(x, y) {
     this.x = x;
@@ -58,7 +66,7 @@ class Grid {
     if (!this.isValidCoordinate(x, y)) {
       return null;
     }
-    return this.cells[x][y];
+    return this.cells[y][x];
   }
   isValidCoordinate(x, y) {
     return x >= 0 && x < this.cols && y >= 0 && y < this.rows;
@@ -176,7 +184,7 @@ class Pathfinder {
     return null;
   }
   findPathAStar(grid) {
-    // Not Implemented
+    // Not implemented
   }
   getNeighbors(grid, cell) {
     let cellneighbors = [];
@@ -237,24 +245,104 @@ endxy.addEventListener("input", function() {
   }
 })
 pathfindButton.addEventListener("click", function() {
+  if (!isRunning) {
+    thegrid.resetPath();
+  }
   let pathfinder = new Pathfinder();
   let path = pathfinder.findPath(thegrid);
-  if (path) {
-    for (let cell of path) {
-      if (!cell.isStart && !cell.isEnd) {
-        console.log("Added path cell!");
-        console.log(thegrid.getCell(cell.x, cell.y));
-        cell.isPath = true;
+  if (!(forward.hidden || backward.hidden)) {
+    forward.hidden = true;
+    backward.hidden = true;
+  }
+  if (animate.checked) {
+    let animindex = 1;
+    if (auto.checked) {
+      if (path) {
+        let timeout = advance.value;
+        if (!timeout) {
+          timeout = 1;
+        }
+        async function autoanim() {
+          isRunning = true;
+          while (!path[animindex].isEnd) {
+            path[animindex].isPath = true;
+            UI.renderGrid(thegrid);
+            animindex += 1;
+            console.log("added next cell");
+            await wait(timeout * 1000);
+          }
+          isRunning = false;
+        }
+        if (!isRunning) {
+          autoanim();
+        }
       }
+    } else {
+      forward.hidden = false;
+      backward.hidden = false;
+      forward.addEventListener("click", function() {
+        if (path) {
+          if (!path[animindex].isStart && !path[animindex].isEnd) {
+            path[animindex].isPath = true;
+            UI.renderGrid(thegrid);
+            animindex += 1;
+            console.log("Showing next cell!")
+          } else {
+            console.log("Error! Animindex is start/end!")
+          }
+        }
+      })
+      backward.addEventListener("click", function() {
+        if (path) {
+          if (animindex !== 1) {
+            animindex -= 1;
+            path[animindex].isPath = false;
+            UI.renderGrid(thegrid);
+            console.log("Deleting previous path!")
+          }
+        }
+      })
+      document.body.appendChild(forward);
+      document.body.appendChild(backward);
     }
-    UI.renderGrid(thegrid);
+    
   } else {
+    if (path) {
+      for (let cell of path) {
+        if (!cell.isStart && !cell.isEnd) {
+          cell.isPath = true;
+        }
+      }
+    UI.renderGrid(thegrid);
+    } else {
     alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.")
+    }
   }
 })
 reset.addEventListener("click", function() {
   thegrid.resetAll();
   startxy.value = "";
   endxy.value = "";
+  auto.checked = false;
+  animate.checked = false;
+  forward.hidden = true;
+  backward.hidden = true;
+  advancetext.hidden = true;
+  advance.hidden = true;
   UI.renderGrid(thegrid);
+})
+animate.addEventListener("change", function() {
+  auto.disabled = !animate.checked;
+  if (!animate.checked) {
+    auto.checked = false;
+  }
+})
+auto.addEventListener("change", function() {
+  if (auto.checked) {
+    advance.hidden = false;
+    advancetext.hidden = false;
+  } else {
+    advance.hidden = true;
+    advancetext.hidden = true;
+  }
 })
