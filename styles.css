@@ -62,4 +62,6 @@ select {
 }
 button {
   background-color: #b4a7d6;
+  border-color: rgb(93, 39, 124);
+  border-radius: 5px;
 }

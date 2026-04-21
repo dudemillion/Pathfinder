@@ -3,13 +3,9 @@ const startxy = document.getElementById("start");
 const endxy = document.getElementById("end");
 const reset = document.getElementById("reset");
 const animate = document.getElementById("anim");
-const forward = document.getElementById("forward");
-const backward = document.getElementById("backward");
-const auto = document.getElementById("auto");
 const advancetext = document.getElementById("advancetext");
 const advance = document.getElementById("advance");
 const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms))
-let isRunning = false;
 class Cell {
   constructor(x, y) {
     this.x = x;
@@ -245,67 +241,38 @@ endxy.addEventListener("input", function() {
   }
 })
 pathfindButton.addEventListener("click", function() {
-  if (!isRunning) {
-    thegrid.resetPath();
-  }
+  thegrid.resetPath();
+  UI.renderGrid(thegrid);
   let pathfinder = new Pathfinder();
   let path = pathfinder.findPath(thegrid);
-  if (!(forward.hidden || backward.hidden)) {
-    forward.hidden = true;
-    backward.hidden = true;
-  }
   if (animate.checked) {
     let animindex = 1;
-    if (auto.checked) {
+    if (animate.checked) {
+      pathfindButton.disabled = true;
+      reset.disabled = true;
+      startxy.disabled = true;
+      endxy.disabled = true;
       if (path) {
         let timeout = advance.value;
         if (!timeout) {
           timeout = 1;
         }
         async function autoanim() {
-          isRunning = true;
           while (!path[animindex].isEnd) {
             path[animindex].isPath = true;
             UI.renderGrid(thegrid);
             animindex += 1;
-            console.log("added next cell");
             await wait(timeout * 1000);
           }
-          isRunning = false;
         }
-        if (!isRunning) {
-          autoanim();
-        }
+        autoanim().then((wait) => {
+          pathfindButton.disabled = false;
+          reset.disabled = false;
+          startxy.disabled = false;
+          endxy.disabled = false;
+        });
       }
-    } else {
-      forward.hidden = false;
-      backward.hidden = false;
-      forward.addEventListener("click", function() {
-        if (path) {
-          if (!path[animindex].isStart && !path[animindex].isEnd) {
-            path[animindex].isPath = true;
-            UI.renderGrid(thegrid);
-            animindex += 1;
-            console.log("Showing next cell!")
-          } else {
-            console.log("Error! Animindex is start/end!")
-          }
-        }
-      })
-      backward.addEventListener("click", function() {
-        if (path) {
-          if (animindex !== 1) {
-            animindex -= 1;
-            path[animindex].isPath = false;
-            UI.renderGrid(thegrid);
-            console.log("Deleting previous path!")
-          }
-        }
-      })
-      document.body.appendChild(forward);
-      document.body.appendChild(backward);
-    }
-    
+    } 
   } else {
     if (path) {
       for (let cell of path) {
@@ -323,22 +290,13 @@ reset.addEventListener("click", function() {
   thegrid.resetAll();
   startxy.value = "";
   endxy.value = "";
-  auto.checked = false;
   animate.checked = false;
-  forward.hidden = true;
-  backward.hidden = true;
   advancetext.hidden = true;
   advance.hidden = true;
   UI.renderGrid(thegrid);
 })
 animate.addEventListener("change", function() {
-  auto.disabled = !animate.checked;
-  if (!animate.checked) {
-    auto.checked = false;
-  }
-})
-auto.addEventListener("change", function() {
-  if (auto.checked) {
+  if (animate.checked) {
     advance.hidden = false;
     advancetext.hidden = false;
   } else {
