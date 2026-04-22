@@ -248,11 +248,11 @@ pathfindButton.addEventListener("click", function() {
   if (animate.checked) {
     let animindex = 1;
     if (animate.checked) {
-      pathfindButton.disabled = true;
-      reset.disabled = true;
-      startxy.disabled = true;
-      endxy.disabled = true;
       if (path) {
+        pathfindButton.disabled = true;
+        reset.disabled = true;
+        startxy.disabled = true;
+        endxy.disabled = true;
         let timeout = advance.value;
         if (!timeout) {
           timeout = 1;
@@ -271,6 +271,8 @@ pathfindButton.addEventListener("click", function() {
           startxy.disabled = false;
           endxy.disabled = false;
         });
+      } else {
+        alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.");
       }
     } 
   } else {
@@ -282,7 +284,7 @@ pathfindButton.addEventListener("click", function() {
       }
     UI.renderGrid(thegrid);
     } else {
-    alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.")
+    alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.");
     }
   }
 })
