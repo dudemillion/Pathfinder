@@ -247,34 +247,32 @@ pathfindButton.addEventListener("click", function() {
   let path = pathfinder.findPath(thegrid);
   if (animate.checked) {
     let animindex = 1;
-    if (animate.checked) {
-      if (path) {
-        pathfindButton.disabled = true;
-        reset.disabled = true;
-        startxy.disabled = true;
-        endxy.disabled = true;
-        let timeout = advance.value;
-        if (!timeout) {
-          timeout = 1;
-        }
-        async function autoanim() {
-          while (!path[animindex].isEnd) {
-            path[animindex].isPath = true;
-            UI.renderGrid(thegrid);
-            animindex += 1;
-            await wait(timeout * 1000);
-          }
-        }
-        autoanim().then((wait) => {
-          pathfindButton.disabled = false;
-          reset.disabled = false;
-          startxy.disabled = false;
-          endxy.disabled = false;
-        });
-      } else {
-        alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.");
+    if (path) {
+      pathfindButton.disabled = true;
+      reset.disabled = true;
+      startxy.disabled = true;
+      endxy.disabled = true;
+      let timeout = advance.value;
+      if (!timeout) {
+        timeout = 1;
       }
-    } 
+      async function autoanim() {
+        while (!path[animindex].isEnd) {
+          path[animindex].isPath = true;
+          UI.renderGrid(thegrid);
+          animindex += 1;
+          await wait(timeout * 1000);
+        }
+      }
+      autoanim().then((wait) => {
+        pathfindButton.disabled = false;
+        reset.disabled = false;
+        startxy.disabled = false;
+        endxy.disabled = false;
+      });
+    } else {
+      alert("This path is impossible! Make sure you defined a start and end and the walls aren't blocking all possible paths.");
+    }
   } else {
     if (path) {
       for (let cell of path) {
